@@ -45,7 +45,7 @@ jobs:
           fi
           
           echo "Ссылка получена, скачиваю..."
-          curl -L "$DOWNLOAD_URL" -o target.apk
+          curl -kL "$DOWNLOAD_URL" -o target.apk
           
       - name: Calculate Hash
         id: calc_hash
