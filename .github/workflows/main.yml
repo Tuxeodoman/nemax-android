@@ -80,7 +80,14 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y zipalign imagemagick
           chmod +x apktool.jar
-          
+
+      - name: Update Apktool
+        if: success()
+        run: |
+          curl -sL "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar" -o apktool.jar
+          chmod +x apktool.jar
+          java -jar apktool.jar --version
+
       - name: Decode Keystore
         if: success()
         run: |
