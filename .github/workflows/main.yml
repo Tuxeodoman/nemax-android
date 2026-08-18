@@ -22,8 +22,9 @@ jobs:
 
       - name: Download Target APK from RuStore
         run: |
-          RESPONSE=$(curl -s -X POST "https://backapi.rustore.ru/applicationData/v2/download-link" \
+          RESPONSE=$(curl -s -X POST "https://backapi.rustore.ru/v3/showcase/apps/download-link" \
             -H "Content-Type: application/json" \
+            -H "ruStoreVerCode: 1000" \
             -d '{
               "appId": 2063618637,
               "firstInstall": true,
@@ -36,7 +37,7 @@ jobs:
               "withoutSplits": true
             }')
           
-          DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.body.downloadUrls[0].url')
+          DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.downloadUrls[0].url')
           
           if [ "$DOWNLOAD_URL" == "null" ] || [ -z "$DOWNLOAD_URL" ]; then
             echo "Ошибка: Не удалось получить ссылку. Ответ API: $RESPONSE"
