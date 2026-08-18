@@ -108,10 +108,18 @@ jobs:
           sed -i '/android.permission.BLUETOOTH_CONNECT/d' AndroidManifest.xml
           sed -i '/android.permission.RECEIVE_BOOT_COMPLETED/d' AndroidManifest.xml
           sed -i '/android.permission.ACCESS_COARSE_LOCATION/d' AndroidManifest.xml
+          # Permissions — advertising ID & install attribution
+          sed -i '/com.google.android.gms.permission.AD_ID/d' AndroidManifest.xml
+          sed -i '/com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE/d' AndroidManifest.xml
 
           # Trackers
           grep -rl "tracker-api.vk-analytics.ru" . | xargs sed -i 's/tracker-api.vk-analytics.ru/0.0.0.0/g'
           grep -rl "sdk-api.apptracer.ru" . | xargs sed -i 's/sdk-api.apptracer.ru/0.0.0.0/g'
+
+          # ВАЖНО: компоненты аналитики (AnalyticsProvider, tracer-инициализаторы,
+          # UploadService, SendMetricsEventJobService) из манифеста НЕ удаляем:
+          # в форке KiryaScript их удаление ломало вход по SMS. Эндпоинты при этом
+          # заглушены на 0.0.0.0 выше, так что данные наружу не уходят.
 
       - name: Create Build Variants
         if: success()
@@ -124,25 +132,61 @@ jobs:
         if: success()
         working-directory: src_orig/res/values
         run: |
-          sed -i 's|<string name="oneme_faq_link">https://help.max.ru</string>|<string name="oneme_faq_link">https://telegra.ph/CHto-takoe-neMAX-12-08</string>|g' strings.xml
-          sed -i 's|<string name="chat_list_toolbar_title">Чаты</string>|<string name="chat_list_toolbar_title">Чаты \| Мод от @nemax_mod</string>|g' strings.xml
-          sed -i 's|<string name="about_app_settings_version">Версия приложения</string>|<string name="about_app_settings_version">Версия MAX. Мод от @nemax_mod</string>|g' strings.xml
+          if grep -q 'name="oneme_faq_link"' strings.xml; then
+            sed -i 's|\(<string name="oneme_faq_link">\)[^<]*\(</string>\)|\1https://telegra.ph/CHto-takoe-neMAX-12-08\2|g' strings.xml
+          else
+            echo "WARNING: key oneme_faq_link not found in strings.xml -- skipping patch"
+          fi
+
+          if grep -q 'name="chat_list_toolbar_title"' strings.xml; then
+            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты | Мод от @nemax_mod\2|g' strings.xml
+          else
+            echo "WARNING: key chat_list_toolbar_title not found in strings.xml -- skipping patch"
+          fi
+
+          if grep -q 'name="about_app_settings_version"' strings.xml; then
+            sed -i 's|\(<string name="about_app_settings_version">\)[^<]*\(</string>\)|\1Версия MAX. Мод от @nemax_mod\2|g' strings.xml
+          else
+            echo "WARNING: key about_app_settings_version not found in strings.xml -- skipping patch"
+          fi
 
       - name: Build & Sign Original Branding
         if: success()
         run: |
+          APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
           java -jar apktool.jar b src_orig -o uns_orig.apk
           zipalign -p -f -v 4 uns_orig.apk aligned_orig.apk
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Original-Branding.apk aligned_orig.apk
+          $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Original-Branding.apk aligned_orig.apk
 
 
       - name: Mod neMAX Full Version
         if: success()
         run: |
-          sed -i 's|<string name="oneme_app_name">MAX</string>|<string name="oneme_app_name">neMAX</string>|g' src_nemax/res/values/strings.xml
-          sed -i 's|<string name="oneme_faq_link">https://help.max.ru</string>|<string name="oneme_faq_link">https://telegra.ph/CHto-takoe-neMAX-12-08</string>|g' src_nemax/res/values/strings.xml
-          sed -i 's|<string name="chat_list_toolbar_title">Чаты</string>|<string name="chat_list_toolbar_title">Чаты \| Мод от @nemax_mod</string>|g' src_nemax/res/values/strings.xml
-          sed -i 's|<string name="about_app_settings_version">Версия приложения</string>|<string name="about_app_settings_version">Версия MAX. Мод от @nemax_mod</string>|g' src_nemax/res/values/strings.xml
+          STRINGS_XML="src_nemax/res/values/strings.xml"
+
+          if grep -q 'name="oneme_app_name"' "$STRINGS_XML"; then
+            sed -i 's|\(<string name="oneme_app_name">\)[^<]*\(</string>\)|\1neMAX\2|g' "$STRINGS_XML"
+          else
+            echo "WARNING: key oneme_app_name not found in strings.xml -- skipping patch"
+          fi
+
+          if grep -q 'name="oneme_faq_link"' "$STRINGS_XML"; then
+            sed -i 's|\(<string name="oneme_faq_link">\)[^<]*\(</string>\)|\1https://telegra.ph/CHto-takoe-neMAX-12-08\2|g' "$STRINGS_XML"
+          else
+            echo "WARNING: key oneme_faq_link not found in strings.xml -- skipping patch"
+          fi
+
+          if grep -q 'name="chat_list_toolbar_title"' "$STRINGS_XML"; then
+            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты | Мод от @nemax_mod\2|g' "$STRINGS_XML"
+          else
+            echo "WARNING: key chat_list_toolbar_title not found in strings.xml -- skipping patch"
+          fi
+
+          if grep -q 'name="about_app_settings_version"' "$STRINGS_XML"; then
+            sed -i 's|\(<string name="about_app_settings_version">\)[^<]*\(</string>\)|\1Версия MAX. Мод от @nemax_mod\2|g' "$STRINGS_XML"
+          else
+            echo "WARNING: key about_app_settings_version not found in strings.xml -- skipping patch"
+          fi
 
           echo "Resizing icons..."
           SOURCE_ICON="ic_launcher_background.webp"
@@ -172,9 +216,10 @@ jobs:
       - name: Build & Sign neMAX Full
         if: success()
         run: |
+          APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
           java -jar apktool.jar b src_nemax -o uns_nemax.apk
           zipalign -p -f -v 4 uns_nemax.apk aligned_nemax.apk
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Full.apk aligned_nemax.apk
+          $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Full.apk aligned_nemax.apk
 
 
       - name: Generate Release Info
