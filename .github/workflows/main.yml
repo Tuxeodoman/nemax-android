@@ -143,7 +143,7 @@ jobs:
           fi
 
           if grep -q 'name="chat_list_toolbar_title"' strings.xml; then
-            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты | Мод от @nemax_mod\2|g' strings.xml
+            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты \| Мод от @nemax_mod\2|g' strings.xml
           else
             echo "WARNING: key chat_list_toolbar_title not found in strings.xml -- skipping patch"
           fi
@@ -181,7 +181,7 @@ jobs:
           fi
 
           if grep -q 'name="chat_list_toolbar_title"' "$STRINGS_XML"; then
-            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты | Мод от @nemax_mod\2|g' "$STRINGS_XML"
+            sed -i 's|\(<string name="chat_list_toolbar_title">\)[^<]*\(</string>\)|\1Чаты \| Мод от @nemax_mod\2|g' "$STRINGS_XML"
           else
             echo "WARNING: key chat_list_toolbar_title not found in strings.xml -- skipping patch"
           fi
