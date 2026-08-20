@@ -121,6 +121,10 @@ jobs:
           # в форке KiryaScript их удаление ломало вход по SMS. Эндпоинты при этом
           # заглушены на 0.0.0.0 выше, так что данные наружу не уходят.
 
+          # aapt2-баг: атрибут app:state_dragged падает в aapt2. Заменяем на
+          # android:state_pressed (паттерн KiryaScript), чтобы сборка не падала.
+          find res -name "*.xml" -type f -exec sed -i 's/app:state_dragged/android:state_pressed/g' {} +
+
       - name: Create Build Variants
         if: success()
         run: |
@@ -154,7 +158,7 @@ jobs:
         if: success()
         run: |
           APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
-          java -jar apktool.jar b src_orig -o uns_orig.apk
+          java -jar apktool.jar b src_orig -o uns_orig.apk --use-aapt1
           zipalign -p -f -v 4 uns_orig.apk aligned_orig.apk
           $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Original-Branding.apk aligned_orig.apk
 
@@ -217,7 +221,7 @@ jobs:
         if: success()
         run: |
           APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
-          java -jar apktool.jar b src_nemax -o uns_nemax.apk
+          java -jar apktool.jar b src_nemax -o uns_nemax.apk --use-aapt1
           zipalign -p -f -v 4 uns_nemax.apk aligned_nemax.apk
           $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Full.apk aligned_nemax.apk
 

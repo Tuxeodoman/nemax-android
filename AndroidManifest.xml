@@ -196,6 +196,18 @@
         </service>
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
         <activity android:exported="false" android:name="com.google.android.gms.common.api.GoogleApiActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <service android:exported="false" android:name="ru.ok.android.externcalls.analytics.internal.upload.UploadService" android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="ru.ok.android.onelog.action.UPLOAD"/>
+            </intent-filter>
+        </service>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@b7b8ba75-c336-4dee-8e2a-64ef488e0218" android:value="ru.ok.tracer.crash.report.CrashReportInitializer"/>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@06f2fae1-db2b-4f87-bc14-fc15c26da3b9" android:value="ru.ok.tracer.performance.metrics.PerformanceMetricsInitializer"/>
+        <provider android:authorities="ru.oneme.app.tracer-startup" android:exported="false" android:name="ru.ok.tracer.startup.InitializationProvider"/>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@25573e8a-bb0f-473f-938a-ca5b3541bda1" android:value="ru.ok.tracer.utils.LoggerInitializer"/>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@e416cfb4-5661-4523-b12c-0ff4ccabd436" android:value="ru.ok.tracer.TracerInitializer"/>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@0d46a772-bffc-4ede-ac88-5dcaf5f822c1" android:value="ru.ok.tracer.disk.usage.DiskUsageInitializer"/>
+        <meta-data android:name="ru.ok.tracer.startup.Initializer@c776f0d5-2110-4920-b53e-7b72536d8135" android:value="ru.ok.tracer.heap.dumps.HeapDumpInitializer"/>
         <service android:directBootAware="false" android:enabled="@bool/enable_system_alarm_service_default" android:exported="false" android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"/>
         <service android:directBootAware="false" android:enabled="@bool/enable_system_job_service_default" android:exported="true" android:name="androidx.work.impl.background.systemjob.SystemJobService" android:permission="android.permission.BIND_JOB_SERVICE"/>
         <receiver android:directBootAware="false" android:enabled="true" android:exported="false" android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"/>
@@ -239,6 +251,11 @@
                 <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS"/>
             </intent-filter>
         </receiver>
+        <service android:exported="false" android:name="ru.ok.android.onelog.UploadService" android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="ru.ok.android.onelog.action.UPLOAD"/>
+            </intent-filter>
+        </service>
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
         <uses-library android:name="androidx.window.sidecar" android:required="false"/>
         <service android:directBootAware="true" android:exported="false" android:name="androidx.room.MultiInstanceInvalidationService"/>
@@ -258,6 +275,11 @@
         </receiver>
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
         <provider android:authorities="ru.oneme.app.ApplicationProvider" android:exported="false" android:name="ru.ok.android.commons.app.ApplicationProvider"/>
+        <service android:exported="false" android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery">
+            <meta-data android:name="backend:com.google.android.datatransport.cct.CctBackendFactory" android:value="cct"/>
+        </service>
+        <service android:exported="false" android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService" android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <receiver android:exported="false" android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"/>
         <activity android:name="com.jakewharton.processphoenix.ProcessPhoenix" android:process=":phoenix" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
         <meta-data android:name="com.facebook.soloader.enabled" android:value="false"/>
         <activity android:exported="false" android:name="com.google.android.play.core.common.PlayCoreDialogWrapperActivity" android:stateNotNeeded="true" android:theme="@style/Theme.PlayCore.Transparent"/>
