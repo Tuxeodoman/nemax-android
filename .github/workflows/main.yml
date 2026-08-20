@@ -158,7 +158,7 @@ jobs:
         if: success()
         run: |
           APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
-          java -jar apktool.jar b src_orig -o uns_orig.apk --use-aapt1
+          java -jar apktool.jar b src_orig -o uns_orig.apk
           zipalign -p -f -v 4 uns_orig.apk aligned_orig.apk
           $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Original-Branding.apk aligned_orig.apk
 
@@ -221,7 +221,7 @@ jobs:
         if: success()
         run: |
           APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)/apksigner
-          java -jar apktool.jar b src_nemax -o uns_nemax.apk --use-aapt1
+          java -jar apktool.jar b src_nemax -o uns_nemax.apk
           zipalign -p -f -v 4 uns_nemax.apk aligned_nemax.apk
           $APKSIGNER sign --ks release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --out neMAX-Full.apk aligned_nemax.apk
 
